@@ -42,11 +42,12 @@ class AclPolicyMaker extends Command
     {
         $sModel = $this->argument("ModelName");
 
-        if(!$this->checkModelExist($sModel))
+        $sModelClass = '\\App\\Models\\'.$sModel;
+        if(!class_exists($sModelClass))
         {
-            $this->error("Please make sure model class exist: ".app_path("Models/$sModel.php"));
-            return false;
+            return $this->error("Model class not found: " . $sModelClass . ", it is required to generate policy, roles and permissions"); 
         }
+
         $aRoles = [];
         $aPermissions = [];
         
@@ -60,8 +61,6 @@ class AclPolicyMaker extends Command
             $aPermissions[] = $this->ask("Please add permissions for ".$aRoles[count($aRoles)-1].", for example(editor: CR, author: RUD)");
         }
         
-        $this->info(print_r($aRoles,true));
-        $this->info(print_r($aPermissions,true));
         $aCRUD = ['C'=>'create','R'=>'read','U'=>'update','D'=>'delete'];
         $sUserType = "";
         $aUserType = [];
@@ -73,11 +72,11 @@ class AclPolicyMaker extends Command
             {
                 $aPerm[] = "'{$aCRUD[$aPermissions[$aLoop][$i]]}'";
             }
-            $sType = "        '".strtolower($aRoles[$aLoop])."'=>[".implode(",",$aPerm)."]\r\n";
+            $sType = "        '".strtolower($aRoles[$aLoop])."'=>[".implode(",",$aPerm)."]";
             $aUserType[] = $sType;
         }
         
-        $sUserType = $sUserType.implode(",",$aUserType);
+        $sUserType = $sUserType.implode(",\r\n",$aUserType);
 
         $sContent =<<<HC
 <?php
