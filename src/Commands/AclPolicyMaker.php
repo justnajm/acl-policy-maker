@@ -40,16 +40,23 @@ class AclPolicyMaker extends Command
      */
     public function handle()
     {
+        $sModel = $this->argument("ModelName");
+
+        if(!$this->checkModelExist($sModel))
+        {
+            $this->error("Please make sure model class exist: ".app_path("Models/$sModel.php"));
+            return false;
+        }
         $aRoles = [];
         $aPermissions = [];
         
-        $aRoles[] = $this->ask("Please add roles for policy class, add role name:");
-        $this->info("You can add permissions based on CRUD alphabets, each alphabet will allow that permission to role");
-        $aPermissions[] = $this->ask("Please add permissions for ".$aRoles[count($aRoles)-1].", for example(editor: CR, author: RUD)");
+        $aRoles[] = $this->ask("Please add roles for policy class, specify 1st role name");
+        $this->info("Now can add permissions based on C R U D alphabets, each alphabet will allow that permission to particular role, for example editor role can CR only, author role can RUD except Creat, admin role can CRUD full access");
+        $aPermissions[] = $this->ask("Please add permissions for ".$aRoles[count($aRoles)-1].", for example(editor: CR, author: RUD, admin: CRUD)");
 
         while($this->confirm("Want to add more roles?",true))
         {
-            $aRoles[] = $this->ask("Specify new role name");
+            $aRoles[] = $this->ask("Add/Specify ".(count($aRoles)+1)." role name");
             $aPermissions[] = $this->ask("Please add permissions for ".$aRoles[count($aRoles)-1].", for example(editor: CR, author: RUD)");
         }
         
@@ -71,8 +78,6 @@ class AclPolicyMaker extends Command
         }
         
         $sUserType = $sUserType.implode(",",$aUserType);
-
-        $sModel = $this->argument("ModelName");
 
         $sContent =<<<HC
 <?php
@@ -131,10 +136,27 @@ HC;
         return Command::SUCCESS;
     }
 
+    private function checkModelExist(string $sModelName)
+    {
+        $sPathModel = app_path("Models/$sModelName.php");
+        
+        if(!$this->oFile->isFile($sPathModel))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
     private function generateFile(string $sPath, string $sFileName, string $sContent)
     {
         $sPath = ($sPath?:app_path()."/Policies");
         $sFile = $sPath."/".$sFileName.".php";
+
+        if(!$this->oFile->isDirectory($sPath))
+        {
+            $this->oFile->makeDirectory($sPath,0644,true,true);
+        }
 
         if($this->oFile->isFile($sFile))
         {
