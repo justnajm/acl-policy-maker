@@ -1,5 +1,5 @@
 {
-    "name": "najm/AclPolicyMaker",
+    "name": "najm/acl-policy-maker",
     "description": "Using artisan generate ACL roles, permissions and laravel policy based on provided model name",
     "keywords": ["artisan", "laravel", "ACL", "Policy", "model","roles","permissions"],
     "license": "MIT",
