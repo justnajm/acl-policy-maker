@@ -73,7 +73,7 @@ class AclPolicyMaker extends Command
             {
                 $aPerm[] = "'{$aCRUD[$aPermissions[$aLoop][$i]]}'";
             }
-            $sType = "        '{".strtolower($aRoles[$aLoop])."]}'=>[".implode(",",$aPerm)."]\r\n";
+            $sType = "        '".strtolower($aRoles[$aLoop])."'=>[".implode(",",$aPerm)."]\r\n";
             $aUserType[] = $sType;
         }
         
